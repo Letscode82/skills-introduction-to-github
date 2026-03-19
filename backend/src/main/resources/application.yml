@@ -1,0 +1,68 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: sentinel-ai
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sentinel_ai
+    username: ${DB_USERNAME:sentinel}
+    password: ${DB_PASSWORD:sentinel_secret}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  ai:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}
+      chat:
+        options:
+          model: claude-sonnet-4-20250514
+          max-tokens: 4096
+
+sentinel:
+  jwt:
+    secret: ${JWT_SECRET:sentinel-ai-v5-super-secret-key-change-in-production}
+    expiration-ms: 86400000
+  azure-ad:
+    tenant-id: ${AZURE_TENANT_ID:}
+    client-id: ${AZURE_CLIENT_ID:}
+  microsoft-graph:
+    client-id: ${MS_GRAPH_CLIENT_ID:}
+    client-secret: ${MS_GRAPH_CLIENT_SECRET:}
+    tenant-id: ${MS_GRAPH_TENANT_ID:}
+  auto-disposition:
+    enabled: true
+    threshold-score: 25
+    min-confidence: 0.93
+  triage:
+    timeout-minutes: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true

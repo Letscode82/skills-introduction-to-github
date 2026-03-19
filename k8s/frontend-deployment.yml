@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentinel-frontend
+  namespace: sentinel-ai
+  labels:
+    app: sentinel-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sentinel-frontend
+  template:
+    metadata:
+      labels:
+        app: sentinel-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: sentinel-ai/frontend:5.0.0
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-frontend
+  namespace: sentinel-ai
+spec:
+  selector:
+    app: sentinel-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sentinel-ingress
+  namespace: sentinel-ai
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: sentinel.abcl.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sentinel-frontend
+                port:
+                  number: 80
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: sentinel-backend
+                port:
+                  number: 8080
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: sentinel-backend
+                port:
+                  number: 8080

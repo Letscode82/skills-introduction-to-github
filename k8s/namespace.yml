@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sentinel-ai
+  labels:
+    app: sentinel-ai
+    version: v5
